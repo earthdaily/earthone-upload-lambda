@@ -22,7 +22,6 @@ S3 Upload → Lambda → EarthOne Catalog → Step Function / Inference Engine
 - AWS S3
 - EarthDaily EarthOne SDK (`earthdaily-earthone`)
 - Docker
-- uv (optional dependency management)
 
 ---
 
