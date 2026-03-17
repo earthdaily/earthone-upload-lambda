@@ -1,0 +1,3 @@
+earthdaily-earthone
+boto3
+httpx
