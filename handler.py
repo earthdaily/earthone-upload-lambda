@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 import boto3
 from shapely.geometry import shape
