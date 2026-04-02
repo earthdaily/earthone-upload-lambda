@@ -1,6 +1,8 @@
 import json
+import logging
 import os
 import boto3
+from shapely.geometry import shape
 
 _sm = boto3.client("secretsmanager")
 s3 = boto3.client("s3")
@@ -26,14 +28,22 @@ def lambda_handler(event, context):
     local_path = f"/tmp/{os.path.basename(tiff_key)}"
     s3.download_file(bucket, tiff_key, local_path)
 
-    product = eo.catalog.Product.get("earthdaily:maxar-gegd-rgb:v1")
+    product = eo.catalog.Product.get_or_create("earthdaily:maxar-gegd-rgb:v1")
+    product.save()
 
-    image = eo.catalog.Image(product=product, name=metadata["id"], geometry=metadata["geometry"], acquired=metadata["start_date"], acquired_end=metadata["stop_date"])
+    image = eo.catalog.Image(id = product.named_id(metadata["id"]))
+    image.product = product
+    image.geometry = metadata["aoi"]
+    image.acquired = metadata["start_date"]
+    image.acquired_end = metadata["stop_date"]
+
     upload = image.upload(local_path)
     upload.wait_for_completion()
 
-    metadata["aoi"] = upload.image.id
+    if metadata["aoi"]:
+        metadata["aoi"] = shape(metadata["aoi"]).wkt
 
     return {
         "metadata": metadata
     }
+
